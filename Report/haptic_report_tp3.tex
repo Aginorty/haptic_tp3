@@ -1,0 +1,133 @@
+\documentclass[11pt,a4paper,oneside,notitlepage]{article}
+
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{pdfpages}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{mathtools}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage[section]{placeins}
+\DeclareUnicodeCharacter{00A0}{}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green},
+  commentstyle=\itshape\color{purple},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+\lstset{escapechar=@,style=customc}
+
+
+\begin{document}
+\title{Haptic Human Robot interfaces \\
+\large TP3 Report}
+\author{Jonathan Bregnard \and Igor Ayrton}
+\date{\today}
+\maketitle
+
+\begin{abstract}
+During this tp we identified the friction torque on the paddle. First we identified dry friction and implemented a compensation. We then implemented gravity compensation. We followed by identifying viscous friction and compensating it as well. Finally a virtual wall was modelised and implemented. We tested our code first only with dry friction compensation but no gravity compensation. Second we added gravity compensation. Third we added viscous friction compensation. 
+\end{abstract}
+
+
+%--------------------------------------------
+%%%%%%%%%%%% friction torque id %%%%%%%%%%%%%
+%--------------------------------------------
+
+
+\section{Friction torque identification}
+
+\subsection{Dry friction}
+To identify the dry friction torque of the paddle we applied a motor current ramp in small steps until the paddle started to move. We did this in both rotating directions. The results can be seen in table \ref{tab:dry friction meas}.
+
+\begin{table}[!htbp]
+  \begin{center}
+    \begin{tabular}{|l|r|r|}%p{5cm}|}
+      \hline
+        measurement N$^{\circ}$ & CW [mNm] & CCW [mNm]\\ \hline \hline
+        1 & 2.24e-4 & -6.32e-4 \\ \hline
+        2 & 2.073-4 & -6.39e-4\\ \hline
+        3 & 2.72e-4 & -6.64e-4\\ \hline
+        4 & 2.46e-4 & -6.46e-4\\ \hline
+        5 & 2.72e.4 & -6.64e-4\\ \hline \hline
+        mean & 2.44e-4 & -6.49e-4\\ 
+         \hline
+    \end{tabular}
+  \end{center}
+  \caption {Dry friction torque measurement} \label{tab:dry friction meas} 
+\end{table}
+
+
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=0.8\textwidth,keepaspectratio]{fig/haptic_paddle_simulink_model}%,angle=90
+%     \caption{Simulation of the angle of the paddle}
+%     \label{fig:simulink model}
+% \end{figure}}
+
+\subsection{Viscous friction}
+To calculate the damping $B_m$ of the motor we used the data sheet of the motor and the relation in equ.\ref{equ:motor damping}.
+We obtain $B_m=0.0145e^{-3} [mNm*sec*deg^{-1}]$.
+\begin{equation}\label{equ:motor damping} 
+i_m*k_\tau=B_m*\omega_m
+\end{equation}
+
+\subsection{Implementation}
+To detect which way the paddle is going we measure the direction of the speed. Idealy we would have a strain gauge to tell which way the user torque is going. As we are measuring speed by deriving the position we get with the encoder we filter it. The filter is a moving average over 10 data points. This filter is implement via the code in listing\ref{moving average}  with the code in listing \ref{friction compensation}.
+
+\begin{lstlisting}[caption=moving average filter,label=moving average]
+void ctrl_RegulatePosition()
+{
+...    
+ctrl_motorTorque_mNm_c=20*sin((ctrl_timestamp/1000000.0)*2*PI/3);
+...
+}
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Friction compensation implementation,label=friction compensation]
+void ctrl_RegulatePosition()
+{
+...    
+ctrl_motorTorque_mNm_c=20*sin((ctrl_timestamp/1000000.0)*2*PI/3);
+...
+}
+
+\end{lstlisting}
+
+%--------------------------------------------
+%%%%%%%%%%%%%%% Virtual wall %%%%%%%%%%%%%%%%%
+%--------------------------------------------
+\section{Virtual wall implementation}
+\subsection{Implemetation}
+\begin{lstlisting}[caption=Hall sensor running mean implementation,label=hall_mean]
+  virtual wall implementation
+
+
+\end{lstlisting}
+\subsection{K-B plot}
+
+\subsection{Results}
+% \begin{itemize}
+%   \item kp=0.04$[Nm/^{\circ}]$
+%   \item ki=0.001$[Nm/s^{\circ}]$
+%   \item kd=0.001$[Nms/^{\circ}]$
+% \end{itemize}
+
+
+%--------------------------------------------
+%%%%%%%%%%%%%%% CONCLUSION %%%%%%%%%%%%%%%%%%
+%--------------------------------------------
+\section{Conclusion}
+Wall is realistic
+
+
+\end{document}
